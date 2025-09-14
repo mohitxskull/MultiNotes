@@ -72,6 +72,10 @@ class ApiClient {
   async upgradeToPro(slug: string): Promise<BaseResponse<string>> {
     return this._request(this.api.post(`tenants/${slug}/upgrade`).json());
   }
+
+  async inviteUser(email: string): Promise<BaseResponse<string>> {
+    return this._request(this.api.post("tenants/invite", { json: { email } }).json());
+  }
 }
 
 export const api = new ApiClient();

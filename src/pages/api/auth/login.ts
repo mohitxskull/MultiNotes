@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { users } from "@/db/schema";
+import { tenants, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { NextApiRequest, NextApiResponse } from "next";
 import { z } from "zod";
@@ -9,7 +9,7 @@ import { BaseResponse } from "@/lib/types";
 import { zodErrorToFormError } from "@/lib/utils";
 
 const loginSchema = z.object({
-  email: z.email(),
+  email: z.string().email(),
   password: z.string().min(3).max(100),
 });
 
@@ -49,6 +49,16 @@ async function handler(
       .json({ success: false, error: "Invalid credentials" });
   }
 
+  const tenant = await db.query.tenants.findFirst({
+    where: eq(tenants.id, user.tenantId),
+  });
+
+  if (!tenant) {
+    return res
+      .status(401)
+      .json({ success: false, error: "Could not find tenant for user" });
+  }
+
   const session = await authService.getSession(req, res);
 
   session.user = {
@@ -56,6 +66,8 @@ async function handler(
     email: user.email,
     role: user.role,
     tenantId: user.tenantId,
+    tenantSlug: tenant.slug,
+    plan: tenant.plan,
   };
 
   await session.save();

@@ -87,7 +87,7 @@ export default function NotesPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
-      // We might need to invalidate user query as well if plan is part of user session
+      queryClient.invalidateQueries({ queryKey: ["user"] });
       toast.success("Upgraded to Pro plan!");
     },
     onError: (error) => {
@@ -138,11 +138,33 @@ export default function NotesPage() {
     },
   });
 
+  const inviteForm = useForm({
+    defaultValues: {
+      email: "",
+    },
+    validators: {
+      onSubmitAsync: async ({ value }) => {
+        const res = await api.inviteUser(value.email);
+
+        if (res.success) {
+          inviteForm.reset();
+          toast.success("User invited successfully!");
+        } else {
+          if (res.error) {
+            toast.error(res.error);
+            return { form: res.error };
+          }
+          if (res.form) {
+            return res.form;
+          }
+        }
+      },
+    },
+  });
+
   if (isUserLoading || isNotesLoading || !user) {
     return <div>Loading...</div>;
   }
-
-  const tenantSlug = user.email.split("@")[1].split(".")[0];
 
   return (
     <div className="container mx-auto p-4">
@@ -241,6 +263,73 @@ export default function NotesPage() {
         </Card>
       </div>
 
+      {user.role === "admin" && (
+        <div className="mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Invite a new user</CardTitle>
+            </CardHeader>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                inviteForm.handleSubmit();
+              }}
+            >
+              <CardContent className="flex flex-col gap-4">
+                <inviteForm.Field name="email">
+                  {(field) => (
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor={field.name}>Email</Label>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        type="email"
+                        placeholder="user@example.com"
+                      />
+                      {field.state.meta.errors && (
+                        <ul className="text-sm text-destructive">
+                          {field.state.meta.errors.map((error, index) => (
+                            <li key={index}>{error}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )}
+                </inviteForm.Field>
+              </CardContent>
+              <inviteForm.Subscribe
+                selector={(
+                  state,
+                ) =>
+                  [
+                    state.canSubmit,
+                    state.isSubmitting,
+                    state.errorMap.onSubmit?.form,
+                  ] as const
+                }
+              >
+                {([canSubmit, isSubmitting, formError]) => (
+                  <CardFooter className="flex flex-col items-start gap-4">
+                    {formError && (
+                      <ul className="text-sm text-destructive">
+                        <li>{formError}</li>
+                      </ul>
+                    )}
+                    <Button type="submit" disabled={!canSubmit || isSubmitting}>
+                      {isSubmitting ? "Inviting..." : "Invite User"}
+                    </Button>
+                  </CardFooter>
+                )}
+              </inviteForm.Subscribe>
+            </form>
+          </Card>
+        </div>
+      )}
+
       <div>
         <h2 className="text-xl font-bold mb-4">Your Notes</h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -270,7 +359,7 @@ export default function NotesPage() {
         </div>
       </div>
 
-      {user.role === "admin" && notes && notes.length >= 3 && (
+      {user.role === "admin" && user.plan === "free" && notes && notes.length >= 3 && (
         <div className="mt-8">
           <Card className="bg-yellow-100 text-yellow-800">
             <CardHeader>
@@ -280,7 +369,7 @@ export default function NotesPage() {
               </CardDescription>
             </CardHeader>
             <CardFooter>
-              <Button onClick={() => upgradeToProMutation.mutate(tenantSlug)}>
+              <Button onClick={() => upgradeToProMutation.mutate(user.tenantSlug)}>
                 Upgrade to Pro
               </Button>
             </CardFooter>

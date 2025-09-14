@@ -34,6 +34,9 @@ async function handler(
     .set({ plan: "pro" })
     .where(eq(tenants.id, tenant.id));
 
+  session.user.plan = "pro";
+  await session.save();
+
   res.status(200).json({ success: true, data: "Upgraded to Pro" });
 }
 

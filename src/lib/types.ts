@@ -19,6 +19,8 @@ export type SessionUser = {
   email: string;
   role: "admin" | "member";
   tenantId: number;
+  tenantSlug: string;
+  plan: "free" | "pro";
 };
 
 
