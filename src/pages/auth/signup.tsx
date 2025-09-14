@@ -14,17 +14,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api } from "@/lib/api";
 
-export default function SignInPage() {
+export default function SignUpPage() {
   const router = useRouter();
 
   const form = useForm({
     defaultValues: {
       email: "",
       password: "",
+      tenantName: "",
     },
     validators: {
       onSubmitAsync: async ({ value, signal }) => {
-        const res = await api.login({ body: value }, { signal });
+        const res = await api.signup({ body: value }, { signal });
 
         if (res.success) {
           router.push("/notes");
@@ -45,8 +46,8 @@ export default function SignInPage() {
     <div className="flex items-center justify-center min-h-screen">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Sign In</CardTitle>
-          <CardDescription>Access your notes.</CardDescription>
+          <CardTitle>Sign Up</CardTitle>
+          <CardDescription>Create your account and your tenant.</CardDescription>
         </CardHeader>
         <form
           onSubmit={(e) => {
@@ -56,6 +57,29 @@ export default function SignInPage() {
           }}
         >
           <CardContent className="flex flex-col gap-4">
+            <form.Field name="tenantName">
+              {(field) => (
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor={field.name}>Tenant Name</Label>
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.currentTarget.value)}
+                    type="text"
+                    placeholder="Your Company Name"
+                  />
+                  {field.state.meta.errors && (
+                    <ul className="text-sm text-destructive">
+                      {field.state.meta.errors.map((error, index) => (
+                        <li key={index}>{error}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </form.Field>
             <form.Field name="email">
               {(field) => (
                 <div className="flex flex-col gap-2">
@@ -105,7 +129,9 @@ export default function SignInPage() {
           </CardContent>
 
           <form.Subscribe
-            selector={(state) =>
+            selector={(
+              state,
+            ) =>
               [
                 state.canSubmit,
                 state.isSubmitting,
@@ -126,7 +152,7 @@ export default function SignInPage() {
                   className="w-full"
                   disabled={!canSubmit || isSubmitting}
                 >
-                  {isSubmitting ? "Signing in..." : "Sign In"}
+                  {isSubmitting ? "Signing up..." : "Sign Up"}
                 </Button>
               </CardFooter>
             )}
@@ -134,9 +160,9 @@ export default function SignInPage() {
         </form>
         <CardFooter className="justify-center">
             <p className="text-sm text-muted-foreground">
-                Don't have an account?{" "}
-                <Link href="/auth/signup" className="font-semibold text-primary hover:underline">
-                    Sign Up
+                Already have an account?{" "}
+                <Link href="/auth/signin" className="font-semibold text-primary hover:underline">
+                    Sign In
                 </Link>
             </p>
         </CardFooter>

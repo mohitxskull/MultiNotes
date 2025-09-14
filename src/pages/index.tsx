@@ -10,6 +10,9 @@ export default function LandingPage() {
         <Button asChild>
           <Link href="/auth/signin">Sign In</Link>
         </Button>
+        <Button asChild variant="secondary">
+          <Link href="/auth/signup">Sign Up</Link>
+        </Button>
       </div>
     </div>
   );

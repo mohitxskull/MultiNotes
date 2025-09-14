@@ -47,6 +47,25 @@ class ApiClient {
     );
   }
 
+  async signup(
+    params: {
+      body: {
+        email: string;
+        password: string;
+        tenantName: string;
+      };
+    },
+    options?: {
+      signal?: AbortSignal;
+    },
+  ): Promise<BaseResponse<string>> {
+    return this._request(
+      this.api
+        .post("auth/signup", { json: params.body, signal: options?.signal })
+        .json()
+    );
+  }
+
   async logout(): Promise<BaseResponse<string>> {
     return this._request(this.api.post("auth/logout").json());
   }

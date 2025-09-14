@@ -170,7 +170,12 @@ export default function NotesPage() {
     <div className="container mx-auto p-4">
       <Toaster />
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Welcome, {user.email}</h1>
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-bold">Welcome, {user.email}</h1>
+          <span className="inline-block px-2 py-1 text-xs font-semibold uppercase rounded-full bg-secondary text-secondary-foreground">
+            {user.plan} Plan
+          </span>
+        </div>
         <Button onClick={() => logoutMutation.mutate()} variant="destructive">
           Sign out
         </Button>
