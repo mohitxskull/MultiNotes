@@ -26,7 +26,6 @@ The following test accounts are available. The password for all accounts is `pas
 
 ### Authentication
 
-- `POST /api/auth/signup`: Create a new user.
 - `POST /api/auth/signin`: Sign in a user.
 - `GET /api/auth/signout`: Sign out a user.
 

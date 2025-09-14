@@ -14,7 +14,7 @@ const createNoteSchema = z.object({
 
 async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<BaseResponse<any>>
+  res: NextApiResponse<BaseResponse<unknown>>
 ) {
   const session = await authService.getSession(req, res);
   const user = session.user!;

@@ -12,7 +12,7 @@ const updateNoteSchema = z.object({
   content: z.string().optional(),
 });
 
-async function handler(req: NextApiRequest, res: NextApiResponse<BaseResponse<any>>) {
+async function handler(req: NextApiRequest, res: NextApiResponse<BaseResponse<unknown>>) {
   const session = await authService.getSession(req, res);
   const user = session.user!;
   const { id } = req.query;

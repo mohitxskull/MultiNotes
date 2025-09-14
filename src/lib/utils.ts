@@ -8,7 +8,7 @@ export const cn = (...inputs: ClassValue[]) => {
 };
 
 export const zodErrorToFormError = (
-  error: z.ZodError<any>,
+  error: z.ZodError<object>,
 ): TanStackFormError => {
   const { fieldErrors, formErrors } = z.flattenError(error);
 

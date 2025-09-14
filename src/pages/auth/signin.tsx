@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
 import { api } from "@/lib/api";
 
 export default function SignInPage() {
@@ -112,7 +111,8 @@ export default function SignInPage() {
                 state.errorMap.onSubmit?.form,
               ] as const
             }
-            children={([canSubmit, isSubmitting, formError]) => (
+          >
+            {([canSubmit, isSubmitting, formError]) => (
               <CardFooter className="flex flex-col gap-4">
                 {formError && (
                   <ul className="text-sm text-destructive">
@@ -127,10 +127,9 @@ export default function SignInPage() {
                 >
                   {isSubmitting ? "Signing in..." : "Sign In"}
                 </Button>
-                
               </CardFooter>
             )}
-          />
+          </form.Subscribe>
         </form>
       </Card>
     </div>
