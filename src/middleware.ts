@@ -4,52 +4,54 @@ import authService from "@/lib/auth_service";
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
   const session = await authService.getMiddlewareSession(req, res);
+  const { user } = session;
   const { pathname } = req.nextUrl;
 
-  const isAuthPage = pathname.startsWith("/auth");
+  // Public routes that do not require authentication
+  const publicRoutes = [
+    "/",
+    "/auth/sign_in",
+    "/auth/sign_up",
+    "/api/auth/login",
+    "/api/auth/signup",
+    "/api/health",
+  ];
 
-  if (isAuthPage) {
-    if (session.user) {
-      // If user is logged in and tries to access login/signup API, forbid it.
-      if (pathname === "/api/auth/login" || pathname === "/api/auth/signup") {
-        return new NextResponse(
-          JSON.stringify({ success: false, error: "Already authenticated" }),
-          { status: 403, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
-      // If user is logged in and tries to access a regular auth page, redirect.
-      if (!pathname.startsWith("/api/auth")) {
-        return NextResponse.redirect(new URL("/notes", req.url));
-      }
+  const isPublicRoute = publicRoutes.includes(pathname);
+
+  if (user) {
+    // If the user is logged in and tries to access a public page (like signin),
+    // redirect them to the dashboard.
+    if (isPublicRoute && !pathname.startsWith("/api")) {
+      return NextResponse.redirect(new URL("/notes", req.url));
     }
-    // If user is not logged in, allow access to auth pages/apis.
-    // Or if user is logged in and accessing a non-login/signup api route like /me or /logout, allow.
-    return res;
-  }
-
-  // This block handles non-auth pages.
-  if (!session.user) {
-    // If not logged in, block access.
-    if (pathname.startsWith("/api")) {
+    // If they try to access a public API route (login/signup), return an error.
+    if (pathname === "/api/auth/login" || pathname === "/api/auth/signup") {
       return new NextResponse(
-        JSON.stringify({ success: false, error: "Unauthorized" }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
+        JSON.stringify({ success: false, error: "Already authenticated" }),
+        { status: 403, headers: { 'Content-Type': 'application/json' } }
       );
     }
-    return NextResponse.redirect(new URL("/auth/sign_in", req.url));
+  } else {
+    // If the user is not logged in and the route is not public, block access.
+    if (!isPublicRoute) {
+      if (pathname.startsWith("/api")) {
+        return new NextResponse(
+          JSON.stringify({ success: false, error: "Unauthorized" }),
+          { status: 401, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+      return NextResponse.redirect(new URL("/auth/sign_in", req.url));
+    }
   }
 
-  // If user is logged in and accessing a non-auth page, allow it.
   return res;
 }
 
 export const config = {
   runtime: "nodejs",
   matcher: [
-    "/notes",
-    "/auth/:path*",
-    "/api/auth/:path*",
-    "/api/notes/:path*",
-    "/api/tenants/:path*",
+    // Match all routes except for static assets and image optimization files
+    '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 };
