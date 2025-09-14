@@ -59,33 +59,41 @@ async function handler(
 
   const hashedPassword = await argon2.hash(password);
 
-  // Note: In a real-world scenario, you'd want a transaction here.
-  const newTenant = await db.insert(tenants).values({
-    name: tenantName,
-    slug: tenantSlug,
-  });
+  try {
+    const { newUserId, newTenantId } = await db.transaction(async (tx) => {
+      const newTenant = await tx.insert(tenants).values({
+        name: tenantName,
+        slug: tenantSlug,
+      });
 
-  const tenantId = newTenant[0].insertId;
+      const tenantId = newTenant[0].insertId;
 
-  const newUser = await db.insert(users).values({
-    email,
-    password: hashedPassword,
-    role: "admin",
-    tenantId: tenantId,
-  });
+      const newUser = await tx.insert(users).values({
+        email,
+        password: hashedPassword,
+        role: "admin",
+        tenantId: tenantId,
+      });
 
-  const session = await authService.getSession(req, res);
-  session.user = {
-    id: newUser[0].insertId,
-    email,
-    role: "admin",
-    tenantId: tenantId,
-    tenantSlug: tenantSlug,
-    plan: "free",
-  };
-  await session.save();
+      return { newUserId: newUser[0].insertId, newTenantId: tenantId };
+    });
 
-  res.status(201).json({ success: true, data: "Signup successful" });
+    const session = await authService.getSession(req, res);
+    session.user = {
+      id: newUserId,
+      email,
+      role: "admin",
+      tenantId: newTenantId,
+      tenantSlug: tenantSlug,
+      plan: "free",
+    };
+    await session.save();
+
+    res.status(201).json({ success: true, data: "Signup successful" });
+  } catch (error) {
+    console.error("Signup transaction failed", error);
+    res.status(500).json({ success: false, error: "An internal error occurred." });
+  }
 }
 
 export default handler;
