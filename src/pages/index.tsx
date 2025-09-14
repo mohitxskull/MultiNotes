@@ -8,10 +8,13 @@ export default function LandingPage() {
       <p className="text-lg mb-8">The best way to manage your notes across multiple tenants.</p>
       <div className="flex gap-4">
         <Button asChild>
-          <Link href="/auth/signin">Sign In</Link>
+          <Link href="/auth/sign_in">Sign In</Link>
         </Button>
         <Button asChild variant="secondary">
-          <Link href="/auth/signup">Sign Up</Link>
+          <Link href="/auth/sign_up">Sign Up</Link>
+        </Button>
+        <Button asChild variant="outline">
+          <Link href="https://github.com/mohitxskull/MultiNotes" target="_blank">GitHub</Link>
         </Button>
       </div>
     </div>

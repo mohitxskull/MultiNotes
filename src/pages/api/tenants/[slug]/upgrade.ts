@@ -2,16 +2,15 @@ import { db } from "@/db";
 import { tenants } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { NextApiRequest, NextApiResponse } from "next";
-import authService from "@/lib/auth_service";
+import authService, { AuthenticatedApiHandler } from "@/lib/auth_service";
 import { BaseResponse } from "@/lib/types";
 
-async function handler(
+const handler: AuthenticatedApiHandler = async (
   req: NextApiRequest,
-  res: NextApiResponse<BaseResponse<string>>
-) {
-  const session = await authService.getSession(req, res);
-  const user = session.user!;
-
+  res: NextApiResponse<BaseResponse<string>>,
+  user,
+  session
+) => {
   if (user.role !== "admin") {
     return res.status(403).json({ success: false, error: "Forbidden" });
   }
@@ -34,10 +33,9 @@ async function handler(
     .set({ plan: "pro" })
     .where(eq(tenants.id, tenant.id));
 
-  if (session.user) {
-    session.user.plan = "pro";
-    await session.save();
-  }
+  // The user object is guaranteed to be present by the withApiAuth middleware
+  session.user!.plan = "pro";
+  await session.save();
 
   res.status(200).json({ success: true, data: "Upgraded to Pro" });
 }

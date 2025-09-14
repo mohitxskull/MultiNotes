@@ -3,7 +3,7 @@ import { users } from "@/db/schema";
 import { NextApiRequest, NextApiResponse } from "next";
 import { z } from "zod";
 import argon2 from "argon2";
-import authService from "@/lib/auth_service";
+import authService, { AuthenticatedApiHandler } from "@/lib/auth_service";
 import { BaseResponse } from "@/lib/types";
 import { zodErrorToFormError } from "@/lib/utils";
 import { eq } from "drizzle-orm";
@@ -12,16 +12,14 @@ const inviteUserSchema = z.object({
   email: z.email(),
 });
 
-async function handler(
+const handler: AuthenticatedApiHandler = async (
   req: NextApiRequest,
-  res: NextApiResponse<BaseResponse<string>>
-) {
+  res: NextApiResponse<BaseResponse<string>>,
+  user
+) => {
   if (req.method !== "POST") {
     return res.status(405).end();
   }
-
-  const session = await authService.getSession(req, res);
-  const user = session.user!;
 
   if (user.role !== "admin") {
     return res.status(403).json({ success: false, error: "Forbidden" });

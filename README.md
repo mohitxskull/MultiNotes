@@ -26,8 +26,10 @@ The following test accounts are available. The password for all accounts is `pas
 
 ### Authentication
 
-- `POST /api/auth/signin`: Sign in a user.
-- `GET /api/auth/signout`: Sign out a user.
+- `POST /api/auth/signup`: Create a new tenant and an admin user.
+- `POST /api/auth/sign_in`: Sign in a user.
+- `POST /api/auth/logout`: Sign out a user.
+- `GET /api/auth/me`: Get the current user session.
 
 ### Notes
 
@@ -39,7 +41,8 @@ The following test accounts are available. The password for all accounts is `pas
 
 ### Tenants
 
-- `POST /api/tenants/:slug/upgrade`: Upgrade a tenant to the "pro" plan.
+- `POST /api/tenants/invite`: Invite a new user to the tenant (admin only).
+- `POST /api/tenants/:slug/upgrade`: Upgrade a tenant to the "pro" plan (admin only).
 
 ### Health
 

@@ -7,7 +7,9 @@ class ApiClient {
     prefixUrl: "/api",
   });
 
-  private async _request<T>(promise: Promise<BaseResponse<T>>): Promise<BaseResponse<T>> {
+  private _request = async <T>(
+    promise: Promise<BaseResponse<T>>
+  ): Promise<BaseResponse<T>> => {
     try {
       return await promise;
     } catch (error) {
@@ -27,9 +29,9 @@ class ApiClient {
 
       return { success: false, error: "Unknown error" };
     }
-  }
+  };
 
-  async login(
+  login = async (
     params: {
       body: {
         email: string;
@@ -38,16 +40,16 @@ class ApiClient {
     },
     options?: {
       signal?: AbortSignal;
-    },
-  ): Promise<BaseResponse<string>> {
+    }
+  ): Promise<BaseResponse<string>> => {
     return this._request(
       this.api
         .post("auth/login", { json: params.body, signal: options?.signal })
         .json()
     );
-  }
+  };
 
-  async signup(
+  signup = async (
     params: {
       body: {
         email: string;
@@ -57,44 +59,44 @@ class ApiClient {
     },
     options?: {
       signal?: AbortSignal;
-    },
-  ): Promise<BaseResponse<string>> {
+    }
+  ): Promise<BaseResponse<string>> => {
     return this._request(
       this.api
         .post("auth/signup", { json: params.body, signal: options?.signal })
         .json()
     );
-  }
+  };
 
-  async logout(): Promise<BaseResponse<string>> {
+  logout = async (): Promise<BaseResponse<string>> => {
     return this._request(this.api.post("auth/logout").json());
-  }
+  };
 
-  async getMe(): Promise<BaseResponse<SessionUser>> {
+  getMe = async (): Promise<BaseResponse<SessionUser>> => {
     return this._request(this.api.get("auth/me").json());
-  }
+  };
 
   // Notes
-  async getNotes(): Promise<BaseResponse<(typeof notes.$inferSelect)[]>> {
+  getNotes = async (): Promise<BaseResponse<(typeof notes.$inferSelect)[]>> => {
     return this._request(this.api.get("notes").json());
-  }
+  };
 
-  async createNote(json: { title: string; content?: string }): Promise<BaseResponse<string>> {
+  createNote = async (json: { title: string; content?: string }): Promise<BaseResponse<string>> => {
     return this._request(this.api.post("notes", { json }).json());
-  }
+  };
 
-  async deleteNote(id: number): Promise<BaseResponse<string>> {
+  deleteNote = async (id: number): Promise<BaseResponse<string>> => {
     return this._request(this.api.delete(`notes/${id}`).json());
-  }
+  };
 
   // Tenants
-  async upgradeToPro(slug: string): Promise<BaseResponse<string>> {
+  upgradeToPro = async (slug: string): Promise<BaseResponse<string>> => {
     return this._request(this.api.post(`tenants/${slug}/upgrade`).json());
-  }
+  };
 
-  async inviteUser(email: string): Promise<BaseResponse<string>> {
+  inviteUser = async (email: string): Promise<BaseResponse<string>> => {
     return this._request(this.api.post("tenants/invite", { json: { email } }).json());
-  }
+  };
 }
 
 export const api = new ApiClient();

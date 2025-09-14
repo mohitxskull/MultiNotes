@@ -3,7 +3,7 @@ import { notes } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { NextApiRequest, NextApiResponse } from "next";
 import { z } from "zod";
-import authService from "@/lib/auth_service";
+import authService, { AuthenticatedApiHandler } from "@/lib/auth_service";
 import { BaseResponse } from "@/lib/types";
 import { zodErrorToFormError } from "@/lib/utils";
 
@@ -12,9 +12,11 @@ const updateNoteSchema = z.object({
   content: z.string().optional(),
 });
 
-async function handler(req: NextApiRequest, res: NextApiResponse<BaseResponse<unknown>>) {
-  const session = await authService.getSession(req, res);
-  const user = session.user!;
+const handler: AuthenticatedApiHandler = async (
+  req: NextApiRequest, 
+  res: NextApiResponse<BaseResponse<unknown>>,
+  user
+) => {
   const { id } = req.query;
   const noteId = parseInt(id as string, 10);
 

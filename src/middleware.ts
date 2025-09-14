@@ -36,7 +36,7 @@ export async function middleware(req: NextRequest) {
         { status: 401, headers: { 'Content-Type': 'application/json' } }
       );
     }
-    return NextResponse.redirect(new URL("/auth/signin", req.url));
+    return NextResponse.redirect(new URL("/auth/sign_in", req.url));
   }
 
   // If user is logged in and accessing a non-auth page, allow it.

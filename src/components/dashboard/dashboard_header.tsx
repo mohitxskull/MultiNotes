@@ -4,9 +4,10 @@ import type { SessionUser } from "@/lib/types";
 interface DashboardHeaderProps {
   user: SessionUser;
   onSignOut: () => void;
+  isSigningOut: boolean;
 }
 
-export function DashboardHeader({ user, onSignOut }: DashboardHeaderProps) {
+export function DashboardHeader({ user, onSignOut, isSigningOut }: DashboardHeaderProps) {
   return (
     <div className="flex justify-between items-center mb-4">
       <div className="flex items-center gap-4">
@@ -15,8 +16,8 @@ export function DashboardHeader({ user, onSignOut }: DashboardHeaderProps) {
           {user.plan} Plan
         </span>
       </div>
-      <Button onClick={onSignOut} variant="destructive">
-        Sign out
+      <Button onClick={onSignOut} variant="destructive" disabled={isSigningOut}>
+        {isSigningOut ? "Signing out..." : "Sign out"}
       </Button>
     </div>
   );

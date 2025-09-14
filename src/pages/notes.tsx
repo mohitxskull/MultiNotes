@@ -13,7 +13,11 @@ import { UpgradeBanner } from "@/components/dashboard/upgrade_banner";
 export default function NotesPage() {
   const router = useRouter();
 
-  const { data: user, isLoading: isUserLoading, isError: isUserError } = useQuery({
+  const {
+    data: user,
+    isLoading: isUserLoading,
+    isError: isUserError,
+  } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
       const response = await api.getMe();
@@ -49,7 +53,7 @@ export default function NotesPage() {
     mutationFn: api.logout,
     onSuccess: (res) => {
       if (res.success) {
-        router.push("/auth/signin");
+        router.push("/auth/sign_in");
       } else {
         toast.error(res.error ?? "Failed to logout");
       }
@@ -63,12 +67,17 @@ export default function NotesPage() {
     return <div>Loading...</div>;
   }
 
-  const showUpgradeBanner = user.role === "admin" && user.plan === "free" && notes.length >= 3;
+  const showUpgradeBanner =
+    user.role === "admin" && user.plan === "free" && notes.length >= 3;
 
   return (
     <div className="container mx-auto p-4">
       <Toaster />
-      <DashboardHeader user={user} onSignOut={() => logoutMutation.mutate()} />
+      <DashboardHeader
+        user={user}
+        onSignOut={() => logoutMutation.mutate()}
+        isSigningOut={logoutMutation.isPending}
+      />
 
       <div className="mb-8">
         <CreateNoteForm />
